@@ -1,0 +1,28 @@
+<div class="app-container">
+  <header class="app-header">
+    <div class="header-content">
+      <span class="logo-text">SNOMED CT Browser</span>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <div class="control-panel">
+      <h1>Snomed Concept Diagram</h1>
+      <div class="search-box">
+        <input #conceptInput type="text" placeholder="Enter Concept ID" value="" class="concept-input">
+        <button (click)="loadConcept(conceptInput.value)" class="generate-btn">Generate Diagram</button>
+      </div>
+    </div>
+
+    @if (conceptId) {
+    <div class="diagram-container">
+      <snomed-concept-diagram [conceptId]="conceptId" [options]="options" [divId]="'my-diagram'">
+      </snomed-concept-diagram>
+    </div>
+    }
+  </main>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 SNOMED International. All rights reserved.</p>
+  </footer>
+</div>

@@ -1,0 +1,135 @@
+/* Concept Diagram Styles */
+.concept-diagram-container {
+    overflow: auto;
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 10px;
+}
+
+.sct-box rect {
+    stroke: #333;
+    stroke-width: 1px;
+    fill: #fff;
+}
+
+.sct-box text {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    fill: #333;
+}
+
+.sct-primitive-concept rect {
+    fill: #a6d8f0;
+    /* Light blue */
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.sct-defined-concept rect {
+    fill: #dba6f0;
+    /* Light purple */
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.sct-attribute rect {
+    fill: #fdfdad;
+    /* Light yellow */
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.concrete-domain rect {
+    fill: #ddd;
+    stroke: black;
+    stroke-width: 1px;
+}
+
+.isa-node circle {
+    fill: white;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.conjunction-node circle {
+    fill: black;
+}
+
+.attribute-group-node circle {
+    fill: white;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+
+
+
+
+.link-line {
+    fill: none;
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.decoration-arrow {
+    fill: black;
+}
+
+.decoration-triangle {
+    fill: white;
+    stroke: black;
+}
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-group {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.btn-group button {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-group button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-group button:not(:last-child) {
+    border-right: 1px solid #ccc;
+}
+
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    font-family: Arial, sans-serif;
+    color: #666;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
