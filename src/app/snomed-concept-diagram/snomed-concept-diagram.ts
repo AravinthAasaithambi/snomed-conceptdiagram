@@ -344,7 +344,7 @@ export class SnomedConceptDiagramComponent implements OnChanges {
             this.connectElements(svg, rectAttr, rectTarget, 'right', 'left', 'BlackTriangle');
 
             y = y + rectTarget.node()!.getBBox().height + 35;
-            // MaxX update ...
+            maxX = Math.max(maxX, x2 + rectTarget.node()!.getBBox().width + 20);
           } else {
             var rectAttr = this.drawSctBox(svg, x, y, typeLabel, typeId, "sct-attribute");
             if (circle2) this.connectElements(svg, circle2, rectAttr, 'center', 'left');
@@ -354,6 +354,7 @@ export class SnomedConceptDiagramComponent implements OnChanges {
             this.connectElements(svg, rectAttr, rectTarget, 'right', 'left', 'BlackTriangle');
 
             y = y + rectTarget.node()!.getBBox().height + 35;
+            maxX = Math.max(maxX, xOffset + rectTarget.node()!.getBBox().width + 20);
           }
         } else {
           if (roleGroups.indexOf(relationship.groupId) === -1) {
@@ -392,6 +393,7 @@ export class SnomedConceptDiagramComponent implements OnChanges {
           this.connectElements(svg, rectRole, rectRole2, 'right', 'left', 'BlackTriangle');
 
           y = y + rectRole2.node()!.getBBox().height + 25;
+          maxX = Math.max(maxX, xTarget + rectRole2.node()!.getBBox().width + 20);
         }
       });
     });
@@ -451,6 +453,7 @@ export class SnomedConceptDiagramComponent implements OnChanges {
     // Determine shape style
     const isDefined = cssClass.includes('sct-defined-concept');
     const isAttribute = cssClass.includes('sct-attribute');
+    const isConcrete = cssClass.includes('concrete-domain');
 
     // Radius: 0 for normal rects (sharp), 18 for attributes (pill)
     const radius = isAttribute ? 18 : 0;
@@ -482,35 +485,67 @@ export class SnomedConceptDiagramComponent implements OnChanges {
     const contentWidth = Math.max(idBBox.width, labelBBox.width);
     const contentHeight = 35; // Fixed height for 2 lines essentially
 
-    const width = contentWidth + padding * 2;
-    // Dynamic height based on layout? Or fixed? Reference looks structured.
-    // Let's use fixed reasonable height for 2 lines.
+    let width = contentWidth + padding * 2;
     const height = contentHeight + padding;
 
-    // --- Draw Outer Rect ---
-    const rect = g.insert('rect', 'text') // Insert before texts
-      .attr('rx', radius)
-      .attr('ry', radius)
-      .attr('width', width)
-      .attr('height', height);
+    if (isConcrete) {
+      width = Math.max(width, 100); // Minimum width
 
-    // --- Draw Inner Rect (Double Border) ---
-    // If Defined or Attribute, draw the inner line
-    if (isDefined || isAttribute) {
-      // 1. Force Outer Rect to be WHITE fill to create the gap effect
-      rect.style('fill', 'white');
+      // Center text
+      idText.attr('x', width / 2).attr('text-anchor', 'middle');
+      labelText.attr('x', width / 2).attr('text-anchor', 'middle');
 
-      // 2. Draw Inner Rect (This will inherit the CSS class color)
-      const offset = 3;
+      if (!id) {
+        // If no ID, center the label vertically
+        labelText.attr('y', height / 2 + 5);
+      } else {
+        // If both, center them as a block
+        idText.attr('y', height / 2 - 5);
+        labelText.attr('y', height / 2 + 10);
+      }
+
+      // Draw Rectangle
       g.insert('rect', 'text')
-        .attr('rx', Math.max(0, radius - offset))
-        .attr('ry', Math.max(0, radius - offset))
-        .attr('x', offset)
-        .attr('y', offset)
-        .attr('width', width - offset * 2)
-        .attr('height', height - offset * 2)
-        .attr('class', 'inner-rect')
-        .style('stroke-width', '1px');
+        .attr('width', width)
+        .attr('height', height)
+        .attr('class', 'concrete-rect');
+
+      // Draw Corner Lines
+      const s = 10; // Size of corner
+      // Top-Left (0,s) -> (s,0)
+      g.append('line').attr('x1', 0).attr('y1', s).attr('x2', s).attr('y2', 0).attr('class', 'corner-line');
+      // Top-Right (w-s,0) -> (w,s)
+      g.append('line').attr('x1', width - s).attr('y1', 0).attr('x2', width).attr('y2', s).attr('class', 'corner-line');
+      // Bottom-Right (w,h-s) -> (w,s)
+      g.append('line').attr('x1', width).attr('y1', height - s).attr('x2', width - s).attr('y2', height).attr('class', 'corner-line');
+      // Bottom-Left (s,h) -> (0,h-s)
+      g.append('line').attr('x1', s).attr('y1', height).attr('x2', 0).attr('y2', height - s).attr('class', 'corner-line');
+    } else {
+      // --- Draw Outer Rect ---
+      const rect = g.insert('rect', 'text') // Insert before texts
+        .attr('rx', radius)
+        .attr('ry', radius)
+        .attr('width', width)
+        .attr('height', height);
+
+      // --- Draw Inner Rect (Double Border) ---
+      // If Defined or Attribute, draw the inner line
+      if (isDefined || isAttribute) {
+        // 1. Force Outer Rect to be WHITE fill to create the gap effect
+        rect.style('fill', 'white');
+
+        // 2. Draw Inner Rect (This will inherit the CSS class color)
+        const offset = 3;
+        g.insert('rect', 'text')
+          .attr('rx', Math.max(0, radius - offset))
+          .attr('ry', Math.max(0, radius - offset))
+          .attr('x', offset)
+          .attr('y', offset)
+          .attr('width', width - offset * 2)
+          .attr('height', height - offset * 2)
+          .attr('class', 'inner-rect')
+          .style('stroke-width', '1px');
+      }
     }
 
     return g;
@@ -684,10 +719,11 @@ export class SnomedConceptDiagramComponent implements OnChanges {
       style.textContent = `
         .sct-box rect { stroke: #333; stroke-width: 1px; fill: #fff; }
         .sct-box text { font-family: Arial, sans-serif; font-size: 12px; fill: #333; }
-        .sct-primitive-concept rect { fill: #a6d8f0; stroke: black; stroke-width: 2px; }
-        .sct-defined-concept rect { fill: #dba6f0; stroke: black; stroke-width: 1px; }
-        .sct-attribute rect { fill: #fdfdad; stroke: black; stroke-width: 1px; }
-        .concrete-domain rect { fill: #ddd; stroke: black; stroke-width: 1px; }
+        .sct-primitive-concept rect { fill: #99ccff; stroke: black; stroke-width: 2px; }
+        .sct-defined-concept rect { fill: #ccccff; stroke: black; stroke-width: 1px; }
+        .sct-attribute rect { fill: #ffffcc; stroke: black; stroke-width: 1px; }
+        .concrete-domain .concrete-rect { fill: #BAEEC8; stroke: #333; stroke-width: 1px; }
+        .corner-line { stroke: #333; stroke-width: 1px; }
         .isa-node circle { fill: white; stroke: black; stroke-width: 2px; }
         .conjunction-node circle { fill: black; }
         .attribute-group-node circle { fill: white; stroke: black; stroke-width: 2px; }
@@ -717,10 +753,11 @@ export class SnomedConceptDiagramComponent implements OnChanges {
       style.textContent = `
         .sct-box rect { stroke: #333; stroke-width: 1px; fill: #fff; }
         .sct-box text { font-family: Arial, sans-serif; font-size: 12px; fill: #333; }
-        .sct-primitive-concept rect { fill: #a6d8f0; stroke: black; stroke-width: 2px; }
-        .sct-defined-concept rect { fill: #dba6f0; stroke: black; stroke-width: 1px; }
-        .sct-attribute rect { fill: #fdfdad; stroke: black; stroke-width: 1px; }
-        .concrete-domain rect { fill: #ddd; stroke: black; stroke-width: 1px; }
+        .sct-primitive-concept rect { fill: #99ccff; stroke: black; stroke-width: 2px; }
+        .sct-defined-concept rect { fill: #ccccff; stroke: black; stroke-width: 1px; }
+        .sct-attribute rect { fill: #ffffcc; stroke: black; stroke-width: 1px; }
+        .concrete-domain .concrete-rect { fill: #BAEEC8; stroke: #333; stroke-width: 1px; }
+        .corner-line { stroke: #333; stroke-width: 1px; }
         .isa-node circle { fill: white; stroke: black; stroke-width: 2px; }
         .conjunction-node circle { fill: black; }
         .attribute-group-node circle { fill: white; stroke: black; stroke-width: 2px; }

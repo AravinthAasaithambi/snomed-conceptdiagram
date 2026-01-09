@@ -19,29 +19,32 @@
 }
 
 .sct-primitive-concept rect {
-    fill: #a6d8f0;
-    /* Light blue */
+    fill: #99ccff;
     stroke: black;
     stroke-width: 2px;
 }
 
 .sct-defined-concept rect {
-    fill: #dba6f0;
-    /* Light purple */
+    fill: #ccccff;
     stroke: black;
     stroke-width: 1px;
 }
 
 .sct-attribute rect {
-    fill: #fdfdad;
-    /* Light yellow */
+    fill: #ffffcc;
     stroke: black;
     stroke-width: 1px;
 }
 
-.concrete-domain rect {
-    fill: #ddd;
-    stroke: black;
+.concrete-domain .concrete-rect {
+    fill: #BAEEC8;
+    stroke: #333;
+    stroke-width: 1px;
+}
+
+.corner-line {
+    fill: none;
+    stroke: #333;
     stroke-width: 1px;
 }
 
@@ -79,6 +82,7 @@
     fill: white;
     stroke: black;
 }
+
 .controls {
     display: flex;
     gap: 10px;
@@ -130,6 +134,11 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
